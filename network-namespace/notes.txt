@@ -1,0 +1,45 @@
+## create network namespace
+sudo ip netns add <network_ns_name>
+
+## execute command inside network namespace
+sudo ip netns exec <network_ns_name> <command>
+
+## see current network configuration
+sudo ip address list
+
+## enable loopback inside network namespace
+sudo ip netns exec <network_ns_name> ip link set dev lo up
+
+## create veth pair
+sudo ip link add dev <veth_name> type veth peer name <veth_pair_name>
+
+## see all link
+sudo ip link list
+
+## move veth pair to network namespace
+sudo ip link set <veth_pair_name> netns <network_ns_name>
+
+## enable veth
+sudo ip link set dev <veth_name> up
+
+## add default route to network namespace
+sudo ip netns exec <network_ns_name> ip route add default via <ip_address>
+
+## create virtual bridge
+sudo ip link add dev <bridge_name> type bridge
+sudo ip address add <cidr, ex:10.0.0.1/24> dev <bridge_name>
+sudo ip link set <bridge_name> up
+
+## connect veth to bridge
+sudo ip link set dev <veth_name> master <bridge_name>
+
+## forward traffic from veth to veth via bridge
+sudo iptables --append FORWARD --in-interface <bridge_name> --out-interface <bridge_name> --jump ACCEPT
+
+## forward traffic between device eth and bridge
+sudo iptables --append FORWARD --in-interface <bridge_name> --out-interface <eth_name> --jump ACCEPT
+sudo iptables --append FORWARD --in-interface <eth_name> --out-interface <bridge_name> --jump ACCEPT
+
+
+
+
